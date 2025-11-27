@@ -1,0 +1,43 @@
+name: ai-chat-docker
+services:
+  ai-chat:
+    image: ai-chat-docker:latest
+    build: .
+    container_name: ai_chat_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - OPENROUTER_API_KEY=sk-or-v1-seu-codigo-aqui
+      - OPENAI_API_KEY=sk-seu-codigo-aqui
+      - ANTHROPIC_API_KEY=sk-ant-seu-codigo-aqui
+      - GEMINI_API_KEY=seu-codigo-aqui
+    volumes:
+      - .:/app  # Opcional: para desenvolvimento local
+    x-casaos:
+      envs:
+        - container: OPENROUTER_API_KEY
+          description:
+            en_us: "Chave API do OpenRouter"
+        - container: OPENAI_API_KEY
+          description:
+            en_us: "Chave API da OpenAI"
+        - container: ANTHROPIC_API_KEY
+          description:
+            en_us: "Chave API da Anthropic"
+        - container: GEMINI_API_KEY
+          description:
+            en_us: "Chave API do Google Gemini"
+      ports:
+        - container: "5000"
+          description:
+            en_us: "Web UI Port"
+      icon: "https://cdn-icons-png.flaticon.com/512/2040/2040946.png"
+      main: ai-chat
+      title:
+        en_us: "AI Chat Local"
+      category: "Home Automation"
+      description:
+        en_us: "Chat de IA minimalista, moderno e leve com suporte a múltiplos provedores (OpenAI, Anthropic, Gemini, OpenRouter)."
+        pt_br: "Chat de IA minimalista, moderno e leve com suporte a múltiplos provedores (OpenAI, Anthropic, Gemini, OpenRouter)."
+      author: "MarcosViniicius"

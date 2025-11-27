@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Minimal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <!-- Marked.js para Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- DOMPurify para segurança -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>AI Chat <span style="font-weight: 400; color: var(--text-secondary); font-size: 0.9em;">Local</span></h1>
+        <div class="controls">
+            <select id="provider-select">
+                <option value="" disabled selected>Provedor</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="gemini">Gemini</option>
+                <option value="openrouter">OpenRouter</option>
+            </select>
+            <select id="model-select" disabled>
+                <option value="" disabled selected>Selecione um Modelo</option>
+            </select>
+            <button id="settings-btn" class="icon-btn" title="Configurações">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+            <button id="clear-btn" class="icon-btn" title="Limpar Chat">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Modal de Configurações -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configurações do Sistema</h2>
+                <button id="close-settings" class="icon-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="system-prompt">System Prompt (Instrução Global)</label>
+                    <textarea id="system-prompt" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="max-tokens">Max Tokens</label>
+                    <input type="number" id="max-tokens" min="100" max="32000">
+                </div>
+                <div class="form-group">
+                    <label for="temperature">Temperatura (Criatividade)</label>
+                    <input type="range" id="temperature" min="0" max="1" step="0.1">
+                    <span id="temp-value">0.7</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-settings" class="btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-container">
+        <!-- Mensagens serão inseridas aqui -->
+        <div class="message ai">
+            <div class="avatar">🤖</div>
+            <div class="content">Olá! Selecione um provedor e um modelo para começar.</div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-container">
+            <textarea id="user-input" placeholder="Digite sua mensagem..." rows="1"></textarea>
+            <button id="send-btn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Injeção de Configuração -->
+    <script id="app-config" type="application/json">
+        {{ config | tojson | safe }}
+    </script>
+    <script>
+        window.ENV = JSON.parse(document.getElementById('app-config').textContent);
+    </script>
+
+    <!-- Scripts da Aplicação -->
+    <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
