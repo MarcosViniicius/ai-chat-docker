@@ -1,7 +1,7 @@
 name: ai-chat-docker
 services:
   ai-chat:
-    image: marcosviniicus/ai-chat-docker:latest
+    image: ai-chat-local:latest
     build: .
     container_name: ai_chat_app
     restart: unless-stopped
